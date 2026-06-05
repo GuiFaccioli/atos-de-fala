@@ -7,5 +7,5 @@ __pycache__/
 .venv/
 *.egg-info/
 .pytest_cache/
-# generated data
-data/
+# generated data (root only — keep raw/.../data corpora tracked)
+/data/

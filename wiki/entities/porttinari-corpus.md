@@ -13,6 +13,8 @@ The first Brazilian-Portuguese corpus annotated with speech acts (da Silva, Roma
 PROPOR 2024): a 50% sample of Porttinari-base news — **536 news, 4,091 sentences** — each sentence
 labeled with one ISO 24617-2 communicative function. Creative Commons license.
 Repo: https://github.com/natalypatti/porttinari-base-speech-acts
+Local copy (CC, vendored): `raw/porttinari-base-speech-acts/` — annotation CSV at
+`data/porttinari-annotated-sample-paper-v1-20231211.csv` (columns: `sentence`, `speech_act`, …).
 
 ## Significance
 
