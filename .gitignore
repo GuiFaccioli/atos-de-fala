@@ -11,3 +11,5 @@ __pycache__/
 /data/
 # training artifacts (models/adapters)
 /runs/
+# human gold working dir (annotations are precious — never overwritten by code sync)
+/gold/
