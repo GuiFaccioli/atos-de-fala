@@ -9,9 +9,11 @@ from chomsky.gen.prompts import (
     build_adjudication_prompt,
 )
 from chomsky.gen.minimax import MiniMaxClient
+from chomsky.gen.deepseek import DeepSeekClient
 from chomsky.gen.claude import ClaudeClient
 from chomsky.gen.pipeline import process_example
-from chomsky.gen.dataset import append_annotation, load_done_texts
+from chomsky.gen.dataset import append_annotation, load_done_annotations
+from chomsky.gen.balance import act_counts, under_target_acts
 
 
 def _read(path: str) -> str:
@@ -22,15 +24,22 @@ def _read(path: str) -> str:
 def build_arg_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="chomsky.gen.cli",
-        description="Generate a synthetic speech-act span dataset (MiniMax bulk + Claude adjudicator).",
+        description="Generate a synthetic speech-act span dataset "
+        "(bulk teacher: MiniMax or DeepSeek; Claude adjudicator; per-act balancing).",
     )
     p.add_argument("--n", type=int, required=True, help="number of accepted examples to reach")
     p.add_argument("--out", required=True, help="output JSONL path (append + resume)")
+    p.add_argument("--provider", choices=["minimax", "deepseek"], default="minimax",
+                   help="bulk-teacher provider (default: minimax)")
     p.add_argument("--taxonomy", default="config/taxonomy.yaml")
     p.add_argument("--rubric", default="config/rubric.md")
     p.add_argument("--cross-check-rate", type=float, default=0.15,
                    help="fraction of examples also annotated by Claude for agreement")
     p.add_argument("--threshold", type=float, default=0.8)
+    p.add_argument("--no-balance", dest="balance", action="store_false",
+                   help="disable per-act balancing (default: balanced toward n/num_acts each)")
+    p.add_argument("--focus-k", type=int, default=3,
+                   help="how many under-represented acts to steer each generation toward")
     p.add_argument("--debug", action="store_true")
     return p
 
@@ -38,11 +47,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
 def run(args) -> int:
     taxonomy = load_taxonomy(args.taxonomy)
     rubric = _read(args.rubric)
-    mm = MiniMaxClient()
+    bulk = DeepSeekClient() if args.provider == "deepseek" else MiniMaxClient()
     cl = ClaudeClient()
 
-    def mm_generate_one() -> Dict:
-        raw = mm.complete(build_generation_prompt(rubric, 1))
+    def bulk_generate_one(focus=None) -> Dict:
+        raw = bulk.complete(build_generation_prompt(rubric, 1, focus))
         return parse_llm_json(raw)
 
     def cl_annotate(text: str) -> List[Dict]:
@@ -53,8 +62,12 @@ def run(args) -> int:
         raw = cl.complete(build_adjudication_prompt(rubric, text, problems))
         return parse_llm_json(raw)["spans"]
 
-    done = load_done_texts(args.out)
+    done_anns = load_done_annotations(args.out)
+    done = {a.text for a in done_anns}
     accepted = len(done)
+    counts = act_counts(done_anns) if args.balance else {}
+    # even split: aim for roughly n/num_acts spans of each act
+    per_act_target = max(1, args.n // max(1, len(taxonomy.acts)))
     every = max(1, round(1 / args.cross_check_rate)) if args.cross_check_rate > 0 else 0
     seen = 0
     consecutive_failures = 0
@@ -66,7 +79,9 @@ def run(args) -> int:
             return 1
         seen += 1
         try:
-            obj = mm_generate_one()
+            focus = (under_target_acts(counts, taxonomy.acts, per_act_target, args.focus_k)
+                     if args.balance else None)
+            obj = bulk_generate_one(focus)
             text = obj["text"]
             if text in done:
                 consecutive_failures += 1
@@ -87,6 +102,9 @@ def run(args) -> int:
         if res.annotation is not None:
             append_annotation(args.out, res.annotation)
             done.add(text)
+            if args.balance:
+                for span in res.annotation.spans:
+                    counts[span.act] = counts.get(span.act, 0) + 1
             accepted += 1
             consecutive_failures = 0
             print(f"accepted {accepted}/{args.n}")

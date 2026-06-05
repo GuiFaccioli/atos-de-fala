@@ -2,17 +2,26 @@
 type: concept
 tags: [synthetic-data, teacher-student, distillation, speech-acts, chomsky-project]
 sources: 0
-updated: 2026-06-04
+updated: 2026-06-05
 ---
 
 # Teacher-Mixture Generation Pipeline
 
 ## Definition
 
-The synthetic-data pipeline for the speech-act classifier: MiniMax (bulk teacher) generates
-PT-BR text + span annotations; Claude (adjudicator) re-annotates a sampled fraction and fixes
-disagreements/invalid cases. Only validated, high-agreement-or-adjudicated examples reach the
-training JSONL. The student (BERTimbau, Plan 3) distills the result.
+The synthetic-data pipeline for the speech-act classifier: a **bulk teacher** (MiniMax *or*
+DeepSeek, via `--provider`) generates PT-BR text + span annotations; Claude (adjudicator)
+re-annotates a sampled fraction and fixes disagreements/invalid cases. Only validated,
+high-agreement-or-adjudicated examples reach the training JSONL. The student (BERTimbau, Plan 3)
+distills the result.
+
+## Per-act balancing
+
+Unsteered generation skews to common acts (`informar`), starving rare ones. The CLI counts spans
+per act so far (`chomsky.gen.balance.act_counts`) and, each round, injects the most
+under-represented acts (`under_target_acts`, target ≈ n/num_acts) as a FOCUS hint in the
+generation prompt — pushing the dataset toward an even per-act distribution. Disable with
+`--no-balance`. This directly counters the imbalance that capped Porttinari's macro-F1 at 0.295.
 
 ## How It Works
 
@@ -25,8 +34,9 @@ pure (injected callables), so it is fully unit-tested offline.
 ## Why It Matters
 
 Teacher quality is the ceiling on the student. The agreement gate + adjudication protect label
-quality at low cost: cheap bulk from MiniMax, expensive Claude only where it matters. Reuses the
-Privacy Filter BR lessons (resume-from-disk with fsync; MiniMax reasoning gotchas).
+quality at low cost: cheap bulk (DeepSeek is ~$1-3 for 10k examples; MiniMax also cheap),
+expensive Claude only where it matters. Reuses the Privacy Filter BR lessons (resume-from-disk
+with fsync; reasoning-model gotchas).
 
 ## Related Concepts
 

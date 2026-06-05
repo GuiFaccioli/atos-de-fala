@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 import json
 import re
 
@@ -38,7 +38,9 @@ _SYSTEM = (
 )
 
 
-def build_generation_prompt(rubric: str, n: int) -> List[Dict]:
+def build_generation_prompt(
+    rubric: str, n: int, focus_acts: Optional[List[str]] = None
+) -> List[Dict]:
     user = (
         f"{rubric}\n\n"
         f"Gere {n} exemplo(s). Para CADA exemplo, escreva um texto curto e natural "
@@ -47,6 +49,11 @@ def build_generation_prompt(rubric: str, n: int) -> List[Dict]:
         f'{{"text": "...", "spans": [{{"quote": "trecho exato do texto", "act": "<ato>"}}]}}. '
         f"Os 'quote' devem ser substrings EXATAS e contiguas do 'text'."
     )
+    if focus_acts:
+        user += (
+            "\n\nIMPORTANTE: priorize textos que naturalmente contenham os seguintes "
+            f"atos (estao sub-representados no dataset): {', '.join(focus_acts)}."
+        )
     return [{"role": "system", "content": _SYSTEM}, {"role": "user", "content": user}]
 
 
