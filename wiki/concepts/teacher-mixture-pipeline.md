@@ -10,8 +10,9 @@ updated: 2026-06-05
 ## Definition
 
 The synthetic-data pipeline for the speech-act classifier: a **bulk teacher** (MiniMax *or*
-DeepSeek, via `--provider`) generates PT-BR text + span annotations; Claude (adjudicator)
-re-annotates a sampled fraction and fixes disagreements/invalid cases. Only validated,
+DeepSeek, via `--provider`) generates PT-BR text + span annotations; an **adjudicator**
+(`--adjudicator`: DeepSeek-reasoner, Claude, or `none`) re-annotates a sampled fraction and fixes
+disagreements/invalid cases. Only validated,
 high-agreement-or-adjudicated examples reach the training JSONL. The student (BERTimbau, Plan 3)
 distills the result.
 
@@ -34,9 +35,11 @@ pure (injected callables), so it is fully unit-tested offline.
 ## Why It Matters
 
 Teacher quality is the ceiling on the student. The agreement gate + adjudication protect label
-quality at low cost: cheap bulk (DeepSeek is ~$1-3 for 10k examples; MiniMax also cheap),
-expensive Claude only where it matters. Reuses the Privacy Filter BR lessons (resume-from-disk
-with fsync; reasoning-model gotchas).
+quality at low cost: cheap bulk (DeepSeek is ~$1-3 for 10k examples; MiniMax also cheap), a
+stronger adjudicator only where it matters. **DeepSeek-only** (chat bulk + reasoner adjudicator)
+needs no Anthropic key — cheaper but a same-family check is weaker than a cross-family one (Claude);
+the hard validator (taxonomy/verbatim/non-overlap) backstops either way. Reuses the Privacy Filter
+BR lessons (resume-from-disk with fsync; reasoning-model gotchas).
 
 ## Related Concepts
 

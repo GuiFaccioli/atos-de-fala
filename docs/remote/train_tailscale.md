@@ -56,13 +56,17 @@ pytest -q   # expect the full suite green; model/train smokes now RUN (torch pre
 If `cuda available` is False, install a matching CUDA wheel, e.g.:
 `pip install torch --index-url https://download.pytorch.org/whl/cu124`.
 
-## 3. Generate the dataset (on the box; needs API keys + internet)
+## 3. Generate the dataset (on the box; needs the DeepSeek key + internet)
+
+DeepSeek-only: `deepseek-chat` does the bulk, `deepseek-reasoner` (stronger) adjudicates the
+cross-check + fixes — no Anthropic key needed. (Honest caveat: same-family adjudication is weaker
+than a cross-family check; the reasoner + the hard validator recover most of it. Use
+`--adjudicator none` for validator-only, fastest/cheapest.)
 
 ```bash
-export DEEPSEEK_API_KEY=...        # bulk teacher (cheap)
-export ANTHROPIC_API_KEY=...       # Claude adjudicator
+export DEEPSEEK_API_KEY=...        # bulk + adjudicator (DeepSeek-only)
 python -m chomsky.gen.cli \
-  --provider deepseek --n 10000 \
+  --provider deepseek --adjudicator deepseek --n 10000 \
   --out data/dataset.jsonl \
   --cross-check-rate 0.15 --debug
 ```

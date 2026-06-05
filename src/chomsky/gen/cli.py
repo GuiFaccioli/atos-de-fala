@@ -25,16 +25,21 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="chomsky.gen.cli",
         description="Generate a synthetic speech-act span dataset "
-        "(bulk teacher: MiniMax or DeepSeek; Claude adjudicator; per-act balancing).",
+        "(bulk teacher: MiniMax or DeepSeek; adjudicator: DeepSeek/Claude/none; per-act balancing).",
     )
     p.add_argument("--n", type=int, required=True, help="number of accepted examples to reach")
     p.add_argument("--out", required=True, help="output JSONL path (append + resume)")
     p.add_argument("--provider", choices=["minimax", "deepseek"], default="minimax",
                    help="bulk-teacher provider (default: minimax)")
+    p.add_argument("--adjudicator", choices=["deepseek", "claude", "none"], default="deepseek",
+                   help="cross-checks + fixes disagreements/invalids (default deepseek; "
+                        "'none' = validator-only, no second model)")
+    p.add_argument("--adjudicator-model", default="deepseek-reasoner",
+                   help="model for the deepseek adjudicator (use a stronger model than the bulk)")
     p.add_argument("--taxonomy", default="config/taxonomy.yaml")
     p.add_argument("--rubric", default="config/rubric.md")
     p.add_argument("--cross-check-rate", type=float, default=0.15,
-                   help="fraction of examples also annotated by Claude for agreement")
+                   help="fraction of examples also annotated by the adjudicator for agreement")
     p.add_argument("--threshold", type=float, default=0.8)
     p.add_argument("--no-balance", dest="balance", action="store_false",
                    help="disable per-act balancing (default: balanced toward n/num_acts each)")
@@ -48,19 +53,30 @@ def run(args) -> int:
     taxonomy = load_taxonomy(args.taxonomy)
     rubric = _read(args.rubric)
     bulk = DeepSeekClient() if args.provider == "deepseek" else MiniMaxClient()
-    cl = ClaudeClient()
 
     def bulk_generate_one(focus=None) -> Dict:
         raw = bulk.complete(build_generation_prompt(rubric, 1, focus))
         return parse_llm_json(raw)
 
-    def cl_annotate(text: str) -> List[Dict]:
-        raw = cl.complete(build_annotation_prompt(rubric, text))
-        return parse_llm_json(raw)["spans"]
+    # Adjudicator / cross-checker. Only the chosen client is instantiated, so e.g.
+    # --adjudicator deepseek needs no ANTHROPIC_API_KEY. "none" => validator-only.
+    if args.adjudicator == "claude":
+        adj = ClaudeClient()
+    elif args.adjudicator == "deepseek":
+        adj = DeepSeekClient(model=args.adjudicator_model)
+    else:
+        adj = None
 
-    def adjudicate(text: str, problems: List[str]) -> List[Dict]:
-        raw = cl.complete(build_adjudication_prompt(rubric, text, problems))
-        return parse_llm_json(raw)["spans"]
+    adj_annotate = None
+    adjudicate = None
+    if adj is not None:
+        def adj_annotate(text: str) -> List[Dict]:  # noqa: F811 — defined when adj exists
+            return parse_llm_json(adj.complete(build_annotation_prompt(rubric, text)))["spans"]
+
+        def adjudicate(text: str, problems: List[str]) -> List[Dict]:  # noqa: F811
+            return parse_llm_json(
+                adj.complete(build_adjudication_prompt(rubric, text, problems))
+            )["spans"]
 
     done_anns = load_done_annotations(args.out)
     done = {a.text for a in done_anns}
@@ -86,7 +102,7 @@ def run(args) -> int:
             if text in done:
                 consecutive_failures += 1
                 continue
-            cross = cl_annotate if (every and seen % every == 0) else None
+            cross = adj_annotate if (adj_annotate is not None and every and seen % every == 0) else None
             res = process_example(
                 text, obj["spans"], taxonomy=taxonomy,
                 cross_annotate=cross, adjudicate=adjudicate, threshold=args.threshold,
