@@ -13,3 +13,4 @@ __pycache__/
 /runs/
 # human gold working dir (annotations are precious — never overwritten by code sync)
 /gold/
+.claude/
