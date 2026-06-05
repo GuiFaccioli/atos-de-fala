@@ -58,3 +58,15 @@ def test_build_adjudication_prompt_includes_problems_and_text():
     assert "RUBRICA" in joined
     assert "Bom dia!" in joined
     assert "xingar" in joined
+
+
+def test_build_generation_prompt_focus_acts_listed():
+    msgs = build_generation_prompt("RUBRICA", 1, focus_acts=["oferecer", "desculpar"])
+    joined = " ".join(m["content"] for m in msgs)
+    assert "oferecer" in joined and "desculpar" in joined
+
+
+def test_build_generation_prompt_no_focus_omits_priority_note():
+    msgs = build_generation_prompt("RUBRICA", 1)
+    joined = " ".join(m["content"] for m in msgs)
+    assert "sub-representados" not in joined

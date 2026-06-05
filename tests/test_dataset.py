@@ -1,4 +1,8 @@
-from chomsky.gen.dataset import append_annotation, load_done_texts
+from chomsky.gen.dataset import (
+    append_annotation,
+    load_done_texts,
+    load_done_annotations,
+)
 from chomsky.schema import Annotation, Span
 
 
@@ -22,3 +26,18 @@ def test_each_record_is_one_json_line(tmp_path):
     assert len(lines) == 2
     import json
     assert json.loads(lines[0])["text"] == "Oi!"
+
+
+def test_load_done_annotations_missing_file_is_empty(tmp_path):
+    assert load_done_annotations(str(tmp_path / "nope.jsonl")) == []
+
+
+def test_load_done_annotations_roundtrip(tmp_path):
+    p = str(tmp_path / "out.jsonl")
+    append_annotation(p, Annotation("Oi!", [Span(0, 3, "saudar")]))
+    append_annotation(p, Annotation("Vem?", [Span(0, 4, "pedir")]))
+    anns = load_done_annotations(p)
+    assert anns == [
+        Annotation("Oi!", [Span(0, 3, "saudar")]),
+        Annotation("Vem?", [Span(0, 4, "pedir")]),
+    ]

@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Set
+from typing import List, Set
 from chomsky.schema import Annotation
 
 
@@ -24,3 +24,17 @@ def load_done_texts(path: str) -> Set[str]:
                 continue
             done.add(json.loads(line)["text"])
     return done
+
+
+def load_done_annotations(path: str) -> List[Annotation]:
+    """Return the annotations already written, for resume + per-act balancing."""
+    if not os.path.exists(path):
+        return []
+    out: List[Annotation] = []
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            out.append(Annotation.from_json(line))
+    return out
