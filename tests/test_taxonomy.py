@@ -34,7 +34,7 @@ def test_label_maps_are_inverse_and_contiguous():
     assert all(id2label[label2id[l]] == l for l in labels)
 
 
-def test_shipped_config_yields_49_bioes_labels():
+def test_shipped_config_yields_53_bioes_labels():
     tax = load_taxonomy("config/taxonomy.yaml")
-    assert len(tax.acts) == 12
-    assert len(bioes_labels(tax.acts)) == 49  # 4 * 12 + 1
+    assert len(tax.acts) == 13
+    assert len(bioes_labels(tax.acts)) == 53  # 4 * 13 + 1

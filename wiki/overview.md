@@ -1,16 +1,35 @@
 ---
 type: synthesis
-tags: [language-models, fine-tuning, training, slm, ner]
-sources: 6
-updated: 2026-06-04
+tags: [language-models, fine-tuning, training, speech-acts, ner]
+sources: 9
+updated: 2026-06-05
 ---
 
 # Overview — chomsky
 
-Knowledge base seeded from the `myFirstSmallModel` wiki on **2026-06-04**, carrying over the
-fine-tuning / language-model research. The chomsky-specific thesis is still TBD — what follows
-is the portable, hard-won knowledge from training a 15M-param SLM from scratch and fine-tuning
-the Privacy Filter for Brazilian PII.
+## Thesis (defined 2026-06-05)
+
+**chomsky** builds a span-level **speech-act classifier** for **PT-BR**: it decomposes open text
+into non-overlapping spans and labels each with a speech act (intent). The model is BERTimbau
+fine-tuned with LoRA as a BIOES token classifier, distilled from an LLM teacher mixture
+(Claude rubric/gold + MiniMax bulk, agreement-gated). The taxonomy (13 acts → 53 labels) is
+grounded in ISO 24617-2 + Searle, not in Chomsky's syntax — the name is a nod; the method is
+pragmatics. See [Chomsky vs Pragmatics](concepts/chomsky-vs-pragmatics.md).
+
+Below the thesis sits the portable, hard-won knowledge seeded from the `myFirstSmallModel` wiki
+(SLM-from-scratch + Privacy Filter BR fine-tuning), which the architecture reuses 1:1
+(token classification, BIOES, LoRA, synthetic data).
+
+## Fase 0 — key findings (2026-06-05)
+
+- **Unit of annotation is the "functional segment"** (ISO 24617-2): a minimal stretch carrying
+  one or more communicative functions — the grounding for span-level tagging.
+- **Taxonomy frozen at 13 acts / 53 labels** from ISO 24617-2 general-purpose + social-obligation
+  functions, mapped to Searle, adapted for open text (dialogue-control dimensions dropped).
+- **No public PT-BR span-level speech-act dataset exists** — confirms the synthetic teacher
+  approach. (PROPOR 2024 "Bringing Pragmatics to Porttinari" annotates news, not at our granularity.)
+- **PT-BR pragmatics notes for annotation:** indirect requests ("você poderia…?" = `pedir`) and
+  diminutive softeners ("um minutinho") — captured in the rubric, not as labels.
 
 ## Portable Theses
 
