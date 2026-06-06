@@ -1,8 +1,8 @@
 ---
 type: synthesis
 tags: [language-models, fine-tuning, training, speech-acts, ner]
-sources: 11
-updated: 2026-06-05
+sources: 12
+updated: 2026-06-06
 ---
 
 # Overview — chomsky
@@ -39,6 +39,32 @@ Below the thesis sits the portable, hard-won knowledge seeded from the `myFirstS
   inter-annotator agreement; Turn/Feedback dimensions are unreliable. Confirms the 13-act v1 and
   the dropped dimensions. Known confusable pairs (inform×answer×elaborate×explain; instruct×answer)
   → seed the Plan-2 rubric's disambiguation guidance.
+
+## Fase 2–3 — deployment & collection (2026-06-06)
+
+- **Model shipped and merged.** LoRA adapter merged into BERTimbau → standalone token
+  classifier, exported to **ONNX int8** (~109MB) and published to Hugging Face:
+  model [`lucianfialho/atos-de-fala-ptbr`], dataset [`lucianfialho/atos-de-fala-ptbr-dataset`]
+  (CC BY). Runs **in the browser** via Transformers.js/WebGPU (dtype q8), wasm fallback.
+- **Dataset v1 (synthetic):** 5086 examples, 15816 spans, 3.11 spans/ex, 0 without spans,
+  **balance_ratio 0.474**. Known skew: scaffolding acts over-represented — `pedir` 1996,
+  `saudar` 1844, `agradecer` 1677. Next step: **negative steering** (cap/penalize acts past
+  quota) — capping the three to ~1000 would lift balance to ~0.9.
+- **Decode gotcha:** the Transformers.js token-classification pipeline returns
+  `{entity, score, index, word}` with **no char offsets** — char spans must be reconstructed
+  by walking the text and matching `word` tokens (handling WordPiece `##`). Reading
+  `tok.start/tok.end` yields garbage (whole sentence per token).
+- **Data collection is live** (separate web repo, `atos-de-fala.vercel.app`, Next.js + Neon):
+  the `/jogar` game (model proposes span→act, human votes/corrects → gold) and the new
+  `/assistir` flow — [Human-in-the-Loop Distillation](concepts/human-in-the-loop-distillation.md)
+  on **real interview transcripts** (Roda Viva / FAPESP, see
+  [source](sources/2026-06-06-rodaviva-fapesp-transcripts.md)): the in-browser model proposes,
+  the human corrects → `span_annotation`. Real text fixes the synthetic distribution at the source.
+- **Active-learning plan:** triage by **human disagreement first** (cheapest, no cold-start;
+  `1 − agreement` from the aggregator), then model-uncertainty server-side after the first
+  human-gold retrain. Demographic disagreement is a research output, not noise.
+- **Repo split:** model (Python, this repo) vs web (`atos-de-fala.vercel.app`). The DB schema
+  is owned by the web repo (single source of truth); Python reads it via `TEST_SCHEMA_PATH`.
 
 ## Portable Theses
 
@@ -111,3 +137,4 @@ Below the thesis sits the portable, hard-won knowledge seeded from the `myFirstS
 - [Privacy Filter BR — Build Process](sources/2026-05-06-privacy-filter-br-build.md)
 - [Privacy Filter BR v2 — Plan](sources/2026-05-07-privacy-filter-br-v2-plan.md)
 - [Privacy Filter BR v2 — Execution Log](sources/2026-05-16-privacy-filter-br-v2-execution.md)
+- [Memória Roda Viva (FAPESP) — interview transcripts](sources/2026-06-06-rodaviva-fapesp-transcripts.md)
