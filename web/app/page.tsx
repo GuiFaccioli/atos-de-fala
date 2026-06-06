@@ -122,6 +122,8 @@ export default function LandingPage() {
               <a href="https://github.com/lucianfialho/atos-de-fala" target="_blank" rel="noopener noreferrer">
                 Código no GitHub
               </a>
+              {" · "}
+              <a href="/termo">Termo de uso</a>
             </p>
           </div>
         </footer>
