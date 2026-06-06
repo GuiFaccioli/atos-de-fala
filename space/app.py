@@ -118,6 +118,7 @@ if __name__ == "__main__":
             ["Não concordo com essa decisão, acho um erro. Que tal revisarmos amanhã?"],
             ["Desculpe pelo atraso, prometo entregar hoje. Até mais!"],
         ],
-        allow_flagging="never",
+        cache_examples=False,
+        flagging_mode="never",
     )
-    demo.launch()
+    demo.launch(server_name="0.0.0.0", server_port=7860)
