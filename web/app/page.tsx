@@ -7,10 +7,10 @@ import OnboardingForm from "@/app/components/OnboardingForm";
 import Nav from "@/app/components/Nav";
 import GoalBar from "@/app/components/GoalBar";
 import HowItWorks from "@/app/components/HowItWorks";
-import AnnotatedDemo from "@/app/components/AnnotatedDemo";
+import LiveDemo from "@/app/components/LiveDemo";
 import MapBand from "@/app/components/MapBand";
 import Footer from "@/app/components/Footer";
-import { Underline, CircleScribble } from "@/app/components/marks";
+import { OpenStrip, OQueE, ATeseCard } from "@/app/components/LandingSections";
 
 export default function LandingPage() {
   const router = useRouter();
@@ -55,50 +55,20 @@ export default function LandingPage() {
                 </div>
               </div>
               <div className="lp-hero-demo">
-                <AnnotatedDemo />
+                <LiveDemo />
               </div>
             </div>
           </div>
         </section>
 
+        {/* ── 1b. Open-model strip ───────────────────────────────────── */}
+        <OpenStrip />
+
         {/* ── 2. O que é ─────────────────────────────────────────────── */}
-        <section id="sobre" className="lp-section">
-          <div className="lp-center lp-prose">
-            <p className="label lp-eyebrow">O QUE É</p>
-            <h2 className="display" style={{ fontSize: "clamp(26px, 4vw, 36px)", marginBottom: 20 }}>
-              <span className="mark-word">
-                Atos de fala
-                <Underline className="mark-underline" width={170} height={12} />
-              </span>
-            </h2>
-            <p style={{ fontSize: 17, lineHeight: 1.75, color: "var(--body)" }}>
-              Todo trecho que falamos realiza uma ação: pedir, agradecer, discordar, prometer,
-              se despedir… São os atos de fala. Um modelo de IA tentou adivinhar o ato de cada
-              trecho de milhares de frases — e precisa de gente real pra dizer se ele acertou.
-            </p>
-          </div>
-        </section>
+        <OQueE />
 
         {/* ── 3. A tese — highlighted card ───────────────────────────── */}
-        <section className="lp-section lp-section-tinted">
-          <div className="lp-center lp-prose">
-            <div className="card tese-card" style={{ padding: "36px 40px", textAlign: "left" }}>
-              <span className="tese-scribble" aria-hidden="true">
-                <CircleScribble width={104} height={64} />
-              </span>
-              <p className="label lp-eyebrow">A PERGUNTA DE PESQUISA</p>
-              <h2 className="display" style={{ fontSize: "clamp(22px, 3.5vw, 30px)", marginBottom: 20 }}>
-                Será que todo mundo lê a mesma intenção?
-              </h2>
-              <p style={{ fontSize: 17, lineHeight: 1.75, color: "var(--body)" }}>
-                Ninguém respondeu isso pro português: pessoas de perfis diferentes percebem
-                intenções diferentes na mesma frase? Um nordestino e um paulista, alguém de
-                20 e alguém de 50 — leem o mesmo "que tal?" como sugestão ou como cobrança?
-                Por isso a gente pergunta seu perfil (anônimo) — é o que torna esse dataset único.
-              </p>
-            </div>
-          </div>
-        </section>
+        <ATeseCard />
 
         {/* ── 4. Como funciona — editorial numbered list ─────────────── */}
         <HowItWorks />

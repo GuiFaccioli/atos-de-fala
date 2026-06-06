@@ -91,7 +91,11 @@ export function TermoSections() {
       </Section>
 
       <Section title="8. Contato">
-        <p style={P_STYLE}>contato@exemplo.com</p>
+        <p style={P_STYLE}>
+          <a href="mailto:lucian@metricasboss.com.br" style={{ color: "var(--body)", textDecoration: "underline", textUnderlineOffset: 3 }}>
+            lucian@metricasboss.com.br
+          </a>
+        </p>
       </Section>
 
       <section>

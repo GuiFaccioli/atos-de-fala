@@ -358,7 +358,7 @@ input.field-input:focus {
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
   gap: 48px;
-  align-items: center;
+  align-items: center; /* vertically center demo card against tall headline */
 }
 
 .lp-hero-copy {
@@ -376,11 +376,11 @@ input.field-input:focus {
   margin-bottom: 22px;
 }
 
-/* Brand-yellow tint mark for "intenção" */
+/* Brand-yellow highlighter mark for "intenção" — marker-pen style */
 .hero-mark {
-  background: rgba(247, 165, 1, 0.22);
-  border-radius: 3px;
-  padding: 0 4px;
+  background: linear-gradient(to bottom, transparent 55%, rgba(247, 165, 1, 0.55) 55%);
+  border-radius: 0;
+  padding: 0 2px;
   color: inherit;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
@@ -428,7 +428,7 @@ input.field-input:focus {
 .lp-hero-demo {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .demo-card {
@@ -919,6 +919,161 @@ input.field-input:focus {
   .lp-footer-brand {
     grid-column: 1 / -1;
   }
+}
+
+/* ── Open-model strip ─────────────────────────────────────────────── */
+.lp-open-strip {
+  border-top: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+  background: var(--surface-card);
+  padding: 12px 0;
+}
+
+.lp-open-strip-inner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.lp-open-item {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+.lp-open-sep {
+  color: var(--hairline-strong);
+  font-size: 14px;
+}
+
+.lp-open-link {
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease;
+}
+
+.lp-open-link:hover {
+  color: var(--ink);
+}
+
+/* ── Model tertiary link ──────────────────────────────────────────── */
+.lp-model-link {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: opacity 0.15s ease;
+}
+
+.lp-model-link:hover {
+  opacity: 0.7;
+}
+
+/* ── Live demo input row ──────────────────────────────────────────── */
+.live-demo-input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.live-demo-input {
+  flex: 1;
+  min-width: 0;
+  background: var(--canvas);
+  border: 1px solid var(--hairline-strong);
+  border-radius: 6px;
+  height: 36px;
+  padding: 0 12px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.live-demo-input:focus {
+  border-color: #2c84e0;
+  box-shadow: 0 0 0 2px rgba(44, 132, 224, 0.12);
+}
+
+.live-demo-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.live-demo-btn {
+  height: 36px;
+  padding: 0 16px;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+/* ── Live demo error / cold-start notice ─────────────────────────── */
+.live-demo-notice {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 12px;
+  font-style: italic;
+  line-height: 1.45;
+}
+
+.live-demo-notice-error {
+  color: var(--error);
+  font-style: normal;
+}
+
+/* ── Live demo annotated sentence ────────────────────────────────── */
+.live-demo-sentence {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 0;
+  line-height: 2.2;
+}
+
+.live-demo-plain {
+  font-size: 17px;
+  color: var(--ink);
+  font-weight: 500;
+  white-space: pre;
+}
+
+.live-demo-seg {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  margin-right: 4px;
+}
+
+.live-demo-seg-text {
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.5;
+  /* colored act underline via gradient */
+  background-image: linear-gradient(var(--act-line), var(--act-line));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 2.5px;
+  padding-bottom: 3px;
+}
+
+.live-demo-pill {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  margin-top: 3px;
+  align-self: flex-start;
 }
 
 /* ── Responsive ───────────────────────────────────────────────────── */
