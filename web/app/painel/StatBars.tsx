@@ -48,6 +48,18 @@ export function ActBars({ byAct }: ActBarsProps) {
   );
 }
 
+export function SuggestionBars({ suggByAct }: { suggByAct: Record<string, number> }) {
+  const sorted = Object.entries(suggByAct).sort(([, a], [, b]) => b - a);
+  if (sorted.length === 0) return null;
+  return (
+    <BarList
+      title="Variações sugeridas por ato"
+      entries={sorted}
+      colorFn={(act) => getActTint(act).bg}
+    />
+  );
+}
+
 interface ProfileBarsProps {
   byRegion: Record<string, number>;
   byAge: Record<string, number>;

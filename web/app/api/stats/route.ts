@@ -18,6 +18,7 @@ export async function GET() {
   const ad = (await sql`select verdict, count(*)::int as n from vote group by verdict`) as { verdict: string; n: number }[];
   const acts = (await sql`select s.ai_act, count(*)::int as n from vote v join item_span s on s.id=v.item_span_id group by s.ai_act`) as { ai_act: string; n: number }[];
   const ages = (await sql`select p.age_band, count(*)::int as n from vote v join participant p on p.id=v.participant_id group by p.age_band`) as { age_band: string; n: number }[];
+  const sugActs = (await sql`select s.ai_act, count(*)::int as n from suggestion sg join item_span s on s.id=sg.item_span_id group by s.ai_act`) as { ai_act: string; n: number }[];
 
   let agree = 0;
   let disagree = 0;
@@ -32,6 +33,9 @@ export async function GET() {
   const byAge: Record<string, number> = {};
   for (const row of ages) byAge[row.age_band] = row.n;
 
+  const suggByAct: Record<string, number> = {};
+  for (const row of sugActs) suggByAct[row.ai_act] = row.n;
+
   return NextResponse.json({
     participants: p[0]?.n ?? 0,
     votes: v[0]?.n ?? 0,
@@ -44,5 +48,6 @@ export async function GET() {
     disagree,
     byAct,
     byAge,
+    suggByAct,
   });
 }

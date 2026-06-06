@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import BrazilMap from "@/app/components/BrazilMap";
-import { ActBars, ProfileBars } from "./StatBars";
+import { ActBars, ProfileBars, SuggestionBars } from "./StatBars";
 
 const GOAL = 4000;
 
@@ -18,6 +18,7 @@ interface StatsData {
   byAct: Record<string, number>;
   byAge: Record<string, number>;
   byRegion: Record<string, number>;
+  suggByAct: Record<string, number>;
 }
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
@@ -98,6 +99,13 @@ export default function PainelPage() {
         {data && Object.keys(data.byAct).length > 0 && (
           <div className="card painel-section">
             <ActBars byAct={data.byAct} />
+          </div>
+        )}
+
+        {/* Sugestões por ato */}
+        {data && data.suggByAct && Object.keys(data.suggByAct).length > 0 && (
+          <div className="card painel-section">
+            <SuggestionBars suggByAct={data.suggByAct} />
           </div>
         )}
 
