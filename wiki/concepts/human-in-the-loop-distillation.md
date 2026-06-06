@@ -27,6 +27,9 @@ must capture corrections, not just predictions.
 4. Each action is stored in `span_annotation` with the model's original proposal
    (`model_act`) + the human's verdict (`confirmed | corrected | added`) → both the gold
    label *and* the where-the-model-failed signal.
+5. `chomsky.collect export-spans` turns the rows into trainer-format JSONL (group by turn,
+   majority-vote the act per span, drop thin/overlapping) → feeds the next retrain. This is
+   the step that closes the loop back to the model.
 
 ## Why on real informal text
 

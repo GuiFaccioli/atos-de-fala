@@ -63,6 +63,9 @@ Below the thesis sits the portable, hard-won knowledge seeded from the `myFirstS
   on **real interview transcripts** (Roda Viva / FAPESP, see
   [source](sources/2026-06-06-rodaviva-fapesp-transcripts.md)): the in-browser model proposes,
   the human corrects → `span_annotation`. Real text fixes the synthetic distribution at the source.
+  `chomsky.collect export-spans` then turns those corrections into trainer-format JSONL
+  (group by turn → majority-vote act per span → drop thin/overlapping), **closing the loop**
+  collection → retrain → redeploy.
 - **Active-learning plan:** triage by **human disagreement first** (cheapest, no cold-start;
   `1 − agreement` from the aggregator), then model-uncertainty server-side after the first
   human-gold retrain. Demographic disagreement is a research output, not noise.
