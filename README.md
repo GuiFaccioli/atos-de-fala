@@ -6,7 +6,7 @@
 
 Veja abaixo uma demonstração rápida do fluxo principal do projeto:
 
-[Assistir demonstração do projeto Atos de Fala](docs/assets/demo.mp4)
+[Assistir demonstração do projeto Atos de Fala](https://youtu.be/76kAhUoXPdI)
 
 **Atos de Fala PT-BR** é um projeto aberto para ensinar computadores a entender não só *o que* uma pessoa escreveu, mas *com que intenção* ela escreveu.
 
