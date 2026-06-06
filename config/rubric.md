@@ -42,3 +42,27 @@ Texto: "Oi! Voce poderia me mandar o relatorio? Prometo revisar hoje. Obrigado!"
    {"quote": "Obrigado!", "act": "agradecer"}
  ]}
 ```
+
+## Apêndice A — casos de borda (adaptado de SweDicS / Tufvesson 2024)
+
+Regras de borda das guidelines do SweDicS (`raw/sources/2024-swedics-tufvesson-annotation-guidelines.pdf`),
+traduzidas pro nosso modelo. **Divergência-chave:** o SweDicS é *sentence-level* e rotula a
+frase complexa pelo **ato principal pretendido** (uma subordinada que só dá contexto some no ato
+da principal). **Nós NÃO fazemos isso** — somos *span-level*: cada ato vira seu próprio span.
+Então só importamos os casos **atômicos** abaixo, não a regra de colapso.
+
+7. **Desejo/medo ≠ pedido.** Expressar querer/temer algo é `expressar_emocao`, não `pedir` nem `prometer`. "Queria tanto um carro!" / "Nunca faria isso." -> `expressar_emocao`.
+8. **Link/data/número/nome sozinho = `informar`** (é uma asserção). Com "?" no fim -> `perguntar`. Ex.: "2017-08-22" -> `informar`; "Henrique?" -> `perguntar`.
+9. **Lixo não vira span.** Fragmento quebrado, frases coladas por erro de segmentação, emoji solto, ou texto majoritariamente em outra língua (>50%): **deixe fora** (sem rótulo). É o nosso equivalente ao "Other" deles (que eles descartam).
+10. **Na dúvida, não force.** Trecho genuinamente ambíguo entre atos: prefira **deixar sem rótulo** a chutar. (Equivale ao "Unsure", também descartado por eles.) Para o gold humano coletivo isso vira um botão "incerto/lixo" — controle de qualidade, não label.
+11. **Pergunta retórica = use a regra 1 (mais específico).** Interrogativa que na real é crítica/desacordo -> `discordar`/`expressar_emocao`, não `perguntar`. (O SweDicS, por ser coarse, mantém como Question; nós somos mais finos.)
+12. **Saudar ≠ despedir.** Eles juntam ambos em "Greeting"; aqui são atos distintos: abertura (`saudar`) vs encerramento (`despedir`).
+
+## Apêndice B — macro-classes (eval coarse)
+
+Para avaliação coarse / sentence-level (`chomsky.train.eval_cli --coarse`), os 13 atos colapsam
+nas classes ilocucionárias de Searle (campo `macro` em `config/taxonomy.yaml`):
+`assertivo` (informar, concordar, discordar) · `pergunta` (perguntar) · `diretivo` (pedir, sugerir) ·
+`comissivo` (oferecer, prometer) · `expressivo` (saudar, agradecer, desculpar, despedir, expressar_emocao).
+Nota: o esquema 4-classes do SweDicS **não tem comissivo** — `oferecer`/`prometer` não têm casa lá;
+por isso aqui usamos as 5 de Searle, mais corretas, e não as 4 deles.

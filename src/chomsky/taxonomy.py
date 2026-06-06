@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List, Tuple
 import yaml
 
@@ -7,6 +7,7 @@ import yaml
 class Taxonomy:
     acts: List[str]
     definitions: Dict[str, str]
+    macro: Dict[str, str] = field(default_factory=dict)  # act -> macro-class (Searle); optional
 
 
 def load_taxonomy(path: str) -> Taxonomy:
@@ -14,7 +15,8 @@ def load_taxonomy(path: str) -> Taxonomy:
         obj = yaml.safe_load(f)
     acts = [a["name"] for a in obj["acts"]]
     definitions = {a["name"]: a.get("definition", "") for a in obj["acts"]}
-    return Taxonomy(acts=acts, definitions=definitions)
+    macro = {a["name"]: a["macro"] for a in obj["acts"] if a.get("macro")}
+    return Taxonomy(acts=acts, definitions=definitions, macro=macro)
 
 
 def bioes_labels(acts: List[str]) -> List[str]:

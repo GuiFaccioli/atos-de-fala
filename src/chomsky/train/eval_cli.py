@@ -2,7 +2,8 @@ import argparse
 import json
 from typing import Dict, List
 from chomsky.schema import Annotation
-from chomsky.eval import span_prf1, per_act_f1
+from chomsky.eval import span_prf1, per_act_f1, coarsen, sentence_label_f1
+from chomsky.taxonomy import load_taxonomy
 from chomsky.train.data import load_jsonl
 
 
@@ -73,6 +74,19 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument("--holdout", required=True, help="holdout JSONL (gold)")
     p.add_argument("--taxonomy", default="config/taxonomy.yaml")
     p.add_argument("--max-length", type=int, default=256)
+    p.add_argument(
+        "--mode",
+        choices=["span", "sentence"],
+        default="span",
+        help="span: exact (start,end,act) F1 (span-level gold). "
+        "sentence: reduce each item to its dominant act and compare by index "
+        "(use for sentence-level gold like Porttinari, where span-F1 is ~0 by construction).",
+    )
+    p.add_argument(
+        "--coarse",
+        action="store_true",
+        help="collapse the 13 acts to Searle macro-classes (taxonomy 'macro' field) before scoring.",
+    )
     return p
 
 
@@ -80,7 +94,13 @@ def main(argv=None) -> int:
     args = build_arg_parser().parse_args(argv)
     gold = load_jsonl(args.holdout)
     pred = predict_annotations(args.model, [a.text for a in gold], args.taxonomy, args.max_length)
-    report = score_predictions(gold, pred)
+    macro = load_taxonomy(args.taxonomy).macro if args.coarse else None
+    if args.mode == "sentence":
+        report = sentence_label_f1(gold, pred, macro)
+    else:
+        if macro:
+            gold, pred = coarsen(gold, macro), coarsen(pred, macro)
+        report = score_predictions(gold, pred)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0
 

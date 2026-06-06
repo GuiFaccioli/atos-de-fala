@@ -4,30 +4,47 @@
 # adapted for open PT-BR text. Dialogue-control dimensions (turn/time/feedback) are
 # OUT OF SCOPE for v1 (irrelevant outside transcribed conversation).
 # The code is taxonomy-agnostic — refine the act set here without touching code.
+# `macro` collapses the 13 fine acts into Searle's illocutionary points (Question kept
+# separate, as in dialogue-act work / SweDicS). Used only for coarse / sentence-level
+# eval (chomsky.train.eval_cli --coarse) — additive metadata, does NOT change the v1 set.
+# Macro-classes: assertivo, pergunta, diretivo, comissivo, expressivo.
 acts:
   - name: informar
     definition: Prover ou declarar informacao (ISO Inform; assertivo).
+    macro: assertivo
   - name: perguntar
     definition: Solicitar informacao (ISO Question, tipos set/propositional/check; diretivo).
+    macro: pergunta
   - name: concordar
     definition: Manifestar acordo com algo dito (ISO Agreement; assertivo/expressivo).
+    macro: assertivo
   - name: discordar
     definition: Manifestar desacordo com algo dito (ISO Disagreement; assertivo/expressivo).
+    macro: assertivo
   - name: pedir
     definition: Requisitar ou ordenar uma acao do interlocutor (ISO Request/Instruct; diretivo).
+    macro: diretivo
   - name: sugerir
     definition: Propor uma acao sem obrigar (ISO Suggestion; diretivo fraco).
+    macro: diretivo
   - name: oferecer
     definition: Oferecer-se para fazer ou dar algo (ISO Offer; comissivo).
+    macro: comissivo
   - name: prometer
     definition: Comprometer-se com uma acao futura (ISO Promise; comissivo).
+    macro: comissivo
   - name: saudar
     definition: Iniciar contato social (ISO Greeting; expressivo social).
+    macro: expressivo
   - name: agradecer
     definition: Expressar gratidao (ISO Thanking; expressivo social).
+    macro: expressivo
   - name: desculpar
     definition: Pedir desculpas (ISO Apology; expressivo social).
+    macro: expressivo
   - name: despedir
     definition: Encerrar contato social (ISO Valediction; expressivo social).
+    macro: expressivo
   - name: expressar_emocao
     definition: Manifestar estado emocional ou avaliacao afetiva (expressivo; sentiment).
+    macro: expressivo
