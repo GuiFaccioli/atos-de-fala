@@ -82,8 +82,8 @@ export default function BrazilMap() {
             <path
               key={loc.id}
               d={loc.path}
-              fill={`rgba(12,10,9,${alpha})`}
-              stroke="#e7e5e4"
+              fill={`rgba(35,37,29,${alpha})`}
+              stroke="#bfc1b7"
               strokeWidth={0.5}
               strokeLinejoin="round"
             >
