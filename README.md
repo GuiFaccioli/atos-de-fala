@@ -1,5 +1,13 @@
 # Atos de Fala PT-BR 🗣️
 
+
+
+## Demonstração
+
+Veja abaixo uma demonstração rápida do fluxo principal do projeto:
+
+[Assistir demonstração do projeto Atos de Fala](docs/assets/demo.mp4)
+
 **Atos de Fala PT-BR** é um projeto aberto para ensinar computadores a entender não só *o que* uma pessoa escreveu, mas *com que intenção* ela escreveu.
 
 Em vez de olhar para uma frase apenas como positiva, negativa ou neutra, o projeto identifica trechos do texto e classifica cada um como um **ato de fala**: informar, perguntar, pedir, agradecer, discordar, prometer, sugerir e outros movimentos comunicativos comuns no português brasileiro.
