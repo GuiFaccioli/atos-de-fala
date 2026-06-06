@@ -1153,3 +1153,7 @@ input.field-input:focus {
     font-size: 20px;
   }
 }
+
+/* ── Forget-my-data footer link ────────────────────────────────────── */
+.lp-footer-forget { cursor: pointer; }
+.lp-footer-forget-done { color: var(--muted); font-size: 14px; }

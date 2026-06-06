@@ -1,3 +1,5 @@
+import ForgetLink from "./ForgetLink";
+
 export default function Footer() {
   const year = new Date().getFullYear();
   return (
@@ -16,6 +18,7 @@ export default function Footer() {
             <a href="/termo">Termo de uso</a>
             <a href="#como-funciona">Como funciona</a>
             <a href="#participar">Participar</a>
+            <ForgetLink />
           </nav>
 
           <nav className="lp-footer-col" aria-label="Recursos">
