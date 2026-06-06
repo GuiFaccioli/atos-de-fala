@@ -39,7 +39,10 @@ _SYSTEM = (
 
 
 def build_generation_prompt(
-    rubric: str, n: int, focus_acts: Optional[List[str]] = None
+    rubric: str,
+    n: int,
+    focus_acts: Optional[List[str]] = None,
+    avoid_acts: Optional[List[str]] = None,
 ) -> List[Dict]:
     user = (
         f"{rubric}\n\n"
@@ -53,6 +56,13 @@ def build_generation_prompt(
         user += (
             "\n\nIMPORTANTE: priorize textos que naturalmente contenham os seguintes "
             f"atos (estao sub-representados no dataset): {', '.join(focus_acts)}."
+        )
+    if avoid_acts:
+        user += (
+            "\n\nEVITE os seguintes atos (ja estao super-representados): "
+            f"{', '.join(avoid_acts)}. Nao force saudacoes, agradecimentos nem pedidos "
+            "de cortesia: escreva o texto direto ao ponto, sem abertura/fechamento de "
+            "cortesia, a menos que seja realmente central ao exemplo."
         )
     return [{"role": "system", "content": _SYSTEM}, {"role": "user", "content": user}]
 

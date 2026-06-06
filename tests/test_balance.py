@@ -1,4 +1,4 @@
-from chomsky.gen.balance import act_counts, under_target_acts
+from chomsky.gen.balance import act_counts, under_target_acts, over_target_acts
 from chomsky.schema import Annotation, Span
 
 
@@ -25,3 +25,21 @@ def test_under_target_caps_at_k():
 def test_under_target_empty_when_all_met():
     acts = ["a", "b"]
     assert under_target_acts({"a": 5, "b": 5}, acts, target=5, k=3) == []
+
+
+def test_over_target_returns_highest_at_or_above_target():
+    acts = ["informar", "pedir", "saudar", "oferecer"]
+    counts = {"informar": 3, "pedir": 20, "saudar": 18, "oferecer": 5}
+    # target 5: at/over = pedir(20), saudar(18), oferecer(5); highest first
+    assert over_target_acts(counts, acts, target=5, k=3) == ["pedir", "saudar", "oferecer"]
+
+
+def test_over_target_caps_at_k():
+    acts = ["a", "b", "c"]
+    counts = {"a": 9, "b": 8, "c": 7}
+    assert over_target_acts(counts, acts, target=1, k=2) == ["a", "b"]
+
+
+def test_over_target_empty_when_none_reached():
+    acts = ["a", "b"]
+    assert over_target_acts({"a": 1, "b": 2}, acts, target=5, k=3) == []

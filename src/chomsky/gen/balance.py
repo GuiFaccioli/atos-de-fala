@@ -30,3 +30,19 @@ def under_target_acts(
     below = [a for a in acts if counts.get(a, 0) < target]
     below.sort(key=lambda a: (counts.get(a, 0), acts.index(a)))
     return below[:k]
+
+
+def over_target_acts(
+    counts: Dict[str, int], acts: List[str], target: int, k: int = 3
+) -> List[str]:
+    """Return up to k acts already AT/OVER `target`, highest count first (negative steering).
+
+    These are the over-represented acts (typically conversational scaffolding —
+    saudar/agradecer/pedir — which the teacher emits in every dialogue). Feeding them
+    to the generation prompt as an "avoid" list keeps the teacher from inflating them
+    further once they've hit quota, so the per-act distribution evens out. Ties broken
+    by `acts` order (stable). Returns [] while every act is still under target.
+    """
+    over = [a for a in acts if counts.get(a, 0) >= target]
+    over.sort(key=lambda a: (-counts.get(a, 0), acts.index(a)))
+    return over[:k]

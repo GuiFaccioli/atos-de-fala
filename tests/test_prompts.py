@@ -70,3 +70,15 @@ def test_build_generation_prompt_no_focus_omits_priority_note():
     msgs = build_generation_prompt("RUBRICA", 1)
     joined = " ".join(m["content"] for m in msgs)
     assert "sub-representados" not in joined
+
+
+def test_build_generation_prompt_avoid_acts_listed():
+    msgs = build_generation_prompt("RUBRICA", 1, avoid_acts=["saudar", "agradecer"])
+    joined = " ".join(m["content"] for m in msgs)
+    assert "saudar" in joined and "agradecer" in joined and "EVITE" in joined
+
+
+def test_build_generation_prompt_no_avoid_omits_avoid_note():
+    msgs = build_generation_prompt("RUBRICA", 1)
+    joined = " ".join(m["content"] for m in msgs)
+    assert "EVITE" not in joined

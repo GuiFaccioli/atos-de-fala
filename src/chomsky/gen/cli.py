@@ -14,7 +14,7 @@ from chomsky.gen.deepseek import DeepSeekClient
 from chomsky.gen.claude import ClaudeClient
 from chomsky.gen.pipeline import process_example
 from chomsky.gen.dataset import append_annotation, load_done_annotations
-from chomsky.gen.balance import act_counts, under_target_acts
+from chomsky.gen.balance import act_counts, under_target_acts, over_target_acts
 
 
 def _read(path: str) -> str:
@@ -46,6 +46,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
                    help="disable per-act balancing (default: balanced toward n/num_acts each)")
     p.add_argument("--focus-k", type=int, default=3,
                    help="how many under-represented acts to steer each generation toward")
+    p.add_argument("--avoid-k", type=int, default=3,
+                   help="how many over-represented acts to steer generation AWAY from "
+                        "(negative steering; 0 disables)")
     p.add_argument("--concurrency", type=int, default=1,
                    help="parallel in-flight requests per wave (I/O-bound; try 8). "
                         "Default 1 = sequential.")
@@ -58,8 +61,8 @@ def run(args) -> int:
     rubric = _read(args.rubric)
     bulk = DeepSeekClient() if args.provider == "deepseek" else MiniMaxClient()
 
-    def bulk_generate_one(focus=None) -> Dict:
-        raw = bulk.complete(build_generation_prompt(rubric, 1, focus))
+    def bulk_generate_one(focus=None, avoid=None) -> Dict:
+        raw = bulk.complete(build_generation_prompt(rubric, 1, focus, avoid))
         return parse_llm_json(raw)
 
     # Adjudicator / cross-checker. Only the chosen client is instantiated, so e.g.
@@ -93,10 +96,10 @@ def run(args) -> int:
     consecutive_failures = 0
     max_consecutive = max(50, args.n)  # stall guard: stop if we can't make progress
 
-    def attempt(do_cross: bool, focus):
+    def attempt(do_cross: bool, focus, avoid):
         """One full example, runs in a worker thread: generate -> process. Pure I/O."""
         try:
-            obj = bulk_generate_one(focus)
+            obj = bulk_generate_one(focus, avoid)
             text = obj["text"]
             cross = adj_annotate if (adj_annotate is not None and do_cross) else None
             res = process_example(
@@ -130,11 +133,13 @@ def run(args) -> int:
                 return 1
             focus = (under_target_acts(counts, taxonomy.acts, per_act_target, args.focus_k)
                      if args.balance else None)
+            avoid = (over_target_acts(counts, taxonomy.acts, per_act_target, args.avoid_k)
+                     if args.balance and args.avoid_k > 0 else None)
             futures = []
             for _ in range(workers):
                 do_cross = bool(every) and (seen % every == 0)
                 seen += 1
-                futures.append(pool.submit(attempt, do_cross, focus))
+                futures.append(pool.submit(attempt, do_cross, focus, avoid))
             for fut in as_completed(futures):
                 text, res, err = fut.result()
                 if err is not None:
