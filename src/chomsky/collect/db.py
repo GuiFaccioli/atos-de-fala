@@ -62,6 +62,20 @@ def fetch_perception_records(conn, axis: str) -> List[Dict]:
     return [{"act": act, axis: group} for act, group in rows]
 
 
+def fetch_span_annotations(conn, source: Optional[str] = None) -> List[Dict]:
+    """Human-corrected spans from transcripts (/assistir). One row per saved span."""
+    q = ("select source, source_ref, speaker, context, char_start, char_end, act, verdict "
+         "from span_annotation")
+    params: tuple = ()
+    if source:
+        q += " where source = %s"
+        params = (source,)
+    rows = conn.execute(q, params).fetchall()
+    return [{"source": s, "source_ref": sr, "speaker": sp, "context": c,
+             "char_start": cs, "char_end": ce, "act": a, "verdict": v}
+            for s, sr, sp, c, cs, ce, a, v in rows]
+
+
 def fetch_pending_suggestions(conn) -> List[Dict]:
     rows = conn.execute(
         "select sg.id, s.ai_act, i.text, sg.text "

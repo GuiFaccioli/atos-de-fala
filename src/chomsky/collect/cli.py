@@ -2,6 +2,7 @@
   export   --dataset PATH --honeypots PATH   build items from JSONL annotations -> DB
   ingest                                      print vote counts per span (sanity)
   aggregate --threshold 0.66 --out PATH       resolve spans -> gold JSONL
+  export-spans --out PATH --min-votes 1        transcript corrections (/assistir) -> training JSONL
   confirm                                      confirm pending paraphrases via DeepSeek
   perception --axis region                     act distribution by demographic axis
 """
@@ -24,6 +25,10 @@ def build_arg_parser() -> argparse.ArgumentParser:
     a = sub.add_parser("aggregate")
     a.add_argument("--threshold", type=float, default=0.66)
     a.add_argument("--out", default="gold/collected.jsonl")
+    es = sub.add_parser("export-spans")
+    es.add_argument("--out", default="gold/collected-spans.jsonl")
+    es.add_argument("--min-votes", type=int, default=1)
+    es.add_argument("--source", default=None)
     sub.add_parser("confirm")
     pc = sub.add_parser("perception")
     pc.add_argument("--axis", default="region")
@@ -62,6 +67,17 @@ def main(argv=None) -> int:
                     gold += 1
                     f.write(json.dumps({"span_id": span_id, "act": r.act, "agreement": r.agreement}, ensure_ascii=False) + "\n")
         print(json.dumps({"gold_spans": gold}))
+    elif args.command == "export-spans":
+        from chomsky.collect.export_spans import build_annotations
+        rows = db.fetch_span_annotations(conn, args.source)
+        anns = build_annotations(rows, args.min_votes)
+        out_dir = os.path.dirname(args.out)
+        if out_dir:
+            os.makedirs(out_dir, exist_ok=True)
+        with open(args.out, "w", encoding="utf-8") as f:
+            for a in anns:
+                f.write(a.to_json() + "\n")
+        print(json.dumps({"examples": len(anns), "spans": sum(len(a.spans) for a in anns)}))
     elif args.command == "confirm":
         from chomsky.gen.deepseek import DeepSeekClient
         client = DeepSeekClient()
